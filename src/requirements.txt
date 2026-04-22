@@ -1,0 +1,11 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+sqlmodel>=0.0.16
+aiosqlite>=0.20
+rapidfuzz>=3.6
+duckduckgo-search>=5.0
+imagehash>=4.3
+Pillow>=10.0
+requests>=2.31
+python-multipart>=0.0.9
+playwright>=1.42

@@ -1,0 +1,24 @@
+{
+  "name": "PIDME — BUAL 5860",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "postCreateCommand": "cd src && pip install -r requirements.txt",
+  "postStartCommand": "cd src && python main.py &",
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "PIDME API",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  }
+}
