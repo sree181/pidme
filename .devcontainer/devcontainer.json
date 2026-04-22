@@ -5,12 +5,11 @@
     "ghcr.io/devcontainers/features/node:1": { "version": "20" }
   },
   "postCreateCommand": "cd src && pip install -r requirements.txt && npm install",
-  "postStartCommand": "cd src && python main.py & sleep 3 && npx vite --host 0.0.0.0 &",
   "forwardPorts": [5173, 8000],
   "portsAttributes": {
     "5173": {
       "label": "PIDME Dashboard",
-      "onAutoForward": "openBrowser"
+      "onAutoForward": "openBrowserOnce"
     },
     "8000": {
       "label": "PIDME API",
