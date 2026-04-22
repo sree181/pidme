@@ -1,19 +1,14 @@
 {
   "name": "PIDME — BUAL 5860",
   "image": "mcr.microsoft.com/devcontainers/python:3.12",
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": { "version": "20" }
-  },
-  "postCreateCommand": "cd src && pip install -r requirements.txt && npm install",
-  "forwardPorts": [5173, 8000],
+  "postCreateCommand": "pip install -r src/requirements.txt",
+  "postStartCommand": "cd src && python main.py",
+  "forwardPorts": [8000],
   "portsAttributes": {
-    "5173": {
-      "label": "PIDME Dashboard",
-      "onAutoForward": "openBrowserOnce"
-    },
     "8000": {
-      "label": "PIDME API",
-      "onAutoForward": "silent"
+      "label": "PIDME Dashboard",
+      "onAutoForward": "openBrowserOnce",
+      "visibility": "public"
     }
   },
   "customizations": {
@@ -22,8 +17,7 @@
         "python.defaultInterpreterPath": "/usr/local/bin/python"
       },
       "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance"
+        "ms-python.python"
       ]
     }
   }
