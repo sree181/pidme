@@ -19,6 +19,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Node (if frontend is used)
+# Node
 node_modules/
-dist/

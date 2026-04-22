@@ -5,11 +5,15 @@ Ball Bearings catalog from motion.com + image matching engine
 
 import asyncio
 import logging
+import os
+from pathlib import Path
 from typing import Optional
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -387,6 +391,18 @@ async def _run_scraper(max_products: int):
         logger.info(f"Scraper finished: {len(products)} products saved")
     except Exception as e:
         logger.error(f"Scraper error: {e}")
+
+
+# ── Serve React frontend ──────────────────────────────────────────────
+
+DIST_DIR = Path(__file__).parent / "dist"
+
+if DIST_DIR.is_dir():
+    app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="static")
+
+    @app.get("/{path:path}")
+    async def serve_frontend(path: str):
+        return FileResponse(DIST_DIR / "index.html")
 
 
 if __name__ == "__main__":
