@@ -28,18 +28,31 @@ Ball Bearing Catalog (20 products)
   via API or Swagger UI
 ```
 
+## Quick Start (GitHub Codespaces — Recommended, Zero Install)
+
+**This is the easiest way.** No installs needed — just a GitHub account (free).
+
+1. Go to **https://github.com/sree181/pidme**
+2. Click the green **Code** button → **Codespaces** tab → **Create codespace on main**
+3. Wait ~90 seconds for the environment to build
+4. The backend and frontend start automatically
+5. A notification will pop up saying **"Port 5173 is available"** — click **Open in Browser**
+6. You'll see the **PIDME Dashboard** with 20 ball bearing products, image thumbnails, scores, and approve/reject buttons
+
+> If you miss the notification, click the **Ports** tab at the bottom of the editor, find port **5173**, and click the globe icon.
+
 ## Quick Start (Local)
 
-You need **Python 3.10 or newer**. Nothing else.
+You need **Python 3.10+** and **Node.js 18+**.
 
 ### 1. Clone and navigate
 
 ```bash
-git clone <repo-url>
-cd motion/src
+git clone https://github.com/sree181/pidme.git
+cd pidme/src
 ```
 
-### 2. Create a virtual environment (recommended)
+### 2. Create a virtual environment
 
 ```bash
 python3 -m venv .venv
@@ -51,9 +64,10 @@ source .venv/bin/activate        # macOS / Linux
 
 ```bash
 pip install -r requirements.txt
+npm install
 ```
 
-### 4. Run the application
+### 4. Start the backend (Terminal 1)
 
 ```bash
 python main.py
@@ -63,24 +77,26 @@ You should see:
 
 ```
 INFO: Seeding 20 products...
-INFO: Seeding pre-discovered image candidates...
 INFO: Seed complete.
 INFO: Uvicorn running on http://0.0.0.0:8000
 ```
 
-### 5. Open the API docs
+### 5. Start the frontend (Terminal 2)
 
-Open your browser to **http://localhost:8000/docs** — this is the interactive Swagger UI where you can explore and test every endpoint.
+Open a **second terminal**, navigate to the same folder, activate the venv, and run:
 
-## Quick Start (GitHub Codespaces — Zero Install)
+```bash
+cd pidme/src
+npx vite
+```
 
-If you don't want to install anything locally:
+### 6. Open the dashboard
 
-1. Go to the GitHub repository page
-2. Click the green **Code** button → **Codespaces** tab → **Create codespace on main**
-3. Wait ~60 seconds for the environment to build
-4. A terminal will automatically run the app
-5. When the port notification appears, click **Open in Browser** to access the API docs
+Open **http://localhost:5173** in your browser — this is the visual dashboard.
+
+The API docs are also available at **http://localhost:8000/docs**.
+
+> **Don't have Node.js?** You can skip steps 3b, 5, and 6. The backend still works on its own — just use the Swagger UI at `http://localhost:8000/docs` instead.
 
 ## API Endpoints
 
@@ -116,9 +132,13 @@ src/
 ├── seed_data.py         ← 20 real ball bearing products from motion.com
 ├── seed_candidates.py   ← Pre-discovered image candidates (app works on first run)
 ├── scraper.py           ← Playwright web scraper for motion.com
-├── App.jsx              ← React frontend (optional, requires Node.js)
+├── App.jsx              ← React frontend (product dashboard UI)
+├── main.jsx             ← React entry point
+├── index.html           ← HTML shell for the frontend
+├── vite.config.js       ← Vite dev server config (proxies API to backend)
+├── package.json         ← Node.js dependencies (React, Vite)
 ├── requirements.txt     ← Python dependencies
-└── start.sh             ← One-command launcher script
+└── start.sh             ← One-command launcher (backend + frontend)
 ```
 
 ## How the Scoring Engine Works
@@ -153,13 +173,22 @@ The app ships with **20 real ball bearing products** from motion.com (SKF, Gener
 | Port 8000 already in use | Kill the other process: `lsof -ti:8000 \| xargs kill` (macOS/Linux) |
 | DuckDuckGo search returns no results | You may be rate-limited. Wait 30 seconds and try again. The pre-seeded candidates still work. |
 | `python` not found | Try `python3` instead of `python`. On Windows, try `py`. |
+| `node` or `npm` not found | Install Node.js 18+ from https://nodejs.org. Or skip the frontend and use the Swagger UI. |
+| Frontend shows blank page | Make sure the backend is running first (`python main.py` in Terminal 1) |
 | Permission errors on pip install | Use the virtual environment (step 2 above) instead of system Python |
 
 ## Tech Stack
 
+**Backend (Python):**
 - **FastAPI** — Async Python web framework with auto-generated API docs
 - **SQLModel** — SQL database ORM (SQLite, zero config)
 - **aiosqlite** — Async SQLite driver
 - **rapidfuzz** — Fast fuzzy string matching
 - **duckduckgo-search** — Web image search (no API key needed)
 - **Pillow / imagehash** — Image processing utilities
+
+**Frontend (JavaScript):**
+- **React 18** — UI component library
+- **Vite** — Fast dev server with hot reload
+- **TanStack Query** — Data fetching and caching
+- **Axios** — HTTP client
