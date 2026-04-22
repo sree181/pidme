@@ -12,7 +12,7 @@ import hashlib
 from typing import Optional
 from dataclasses import dataclass
 from rapidfuzz import fuzz
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
 logger = logging.getLogger(__name__)
 
@@ -193,45 +193,49 @@ def search_product_images(
     ]
 
     seen_urls = set()
+    engines = ["bing", "duckduckgo"]
 
     with DDGS() as ddgs:
         for query in queries:
-            try:
-                results = list(ddgs.images(
-                    query,
-                    max_results=max_results,
-                    safesearch="off",
-                ))
-
-                for r in results:
-                    img_url = r.get("image", "")
-                    if not img_url or img_url in seen_urls:
-                        continue
-                    seen_urls.add(img_url)
-
-                    domain = _extract_domain(img_url)
-                    title = r.get("title", "")
-
-                    url_score = _score_url_relevance(img_url, mfr_name, part_number)
-                    title_score = _score_title_relevance(title, mfr_name, part_number, description)
-                    domain_score = _score_domain_trust(domain)
-                    composite, tier = _compute_composite(url_score, title_score, domain_score)
-
-                    candidates.append(ScoredCandidate(
-                        image_url=img_url,
-                        thumbnail_url=r.get("thumbnail", img_url),
-                        source_domain=domain,
-                        source_query=query,
-                        title=title,
-                        url_relevance_score=round(url_score, 4),
-                        title_relevance_score=round(title_score, 4),
-                        domain_trust_score=round(domain_score, 4),
-                        composite_score=composite,
-                        confidence_tier=tier,
+            for engine in engines:
+                try:
+                    results = list(ddgs.images(
+                        query,
+                        max_results=max_results,
+                        engine=engine,
                     ))
-            except Exception as e:
-                logger.warning(f"DuckDuckGo search failed for '{query}': {e}")
-                continue
+
+                    for r in results:
+                        img_url = r.get("image", "")
+                        if not img_url or img_url in seen_urls:
+                            continue
+                        seen_urls.add(img_url)
+
+                        domain = _extract_domain(img_url)
+                        title = r.get("title", "")
+
+                        url_score = _score_url_relevance(img_url, mfr_name, part_number)
+                        title_score = _score_title_relevance(title, mfr_name, part_number, description)
+                        domain_score = _score_domain_trust(domain)
+                        composite, tier = _compute_composite(url_score, title_score, domain_score)
+
+                        candidates.append(ScoredCandidate(
+                            image_url=img_url,
+                            thumbnail_url=r.get("thumbnail", img_url),
+                            source_domain=domain,
+                            source_query=query,
+                            title=title,
+                            url_relevance_score=round(url_score, 4),
+                            title_relevance_score=round(title_score, 4),
+                            domain_trust_score=round(domain_score, 4),
+                            composite_score=composite,
+                            confidence_tier=tier,
+                        ))
+                    if results:
+                        break
+                except Exception as e:
+                    logger.warning(f"Image search failed ({engine}) for '{query}': {e}")
+                    continue
 
     # Sort by composite score descending, return top N
     candidates.sort(key=lambda c: c.composite_score, reverse=True)
