@@ -200,6 +200,23 @@ async def get_product_types():
 
 # ── Image matching endpoints ──────────────────────────────────────────────
 
+@app.post("/api/match/batch")
+async def match_all_products(background_tasks: BackgroundTasks):
+    """Trigger image matching for all products without approved images."""
+    async with SessionLocal() as session:
+        products = (await session.exec(
+            select(Product).where(Product.image_status.in_(["no_image", "rejected"]))
+        )).all()
+        ids = [p.id for p in products]
+        for p in products:
+            p.image_status = "pending"
+        session.add_all(products)
+        await session.commit()
+
+    background_tasks.add_task(_run_batch_matching, ids)
+    return {"status": "started", "product_count": len(ids)}
+
+
 @app.post("/api/match/{product_id}")
 async def match_product_images(product_id: int, background_tasks: BackgroundTasks):
     """
@@ -218,23 +235,6 @@ async def match_product_images(product_id: int, background_tasks: BackgroundTask
 
     background_tasks.add_task(_run_matching, product_id)
     return {"status": "started", "product_id": product_id}
-
-
-@app.post("/api/match/batch")
-async def match_all_products(background_tasks: BackgroundTasks):
-    """Trigger image matching for all products without approved images."""
-    async with SessionLocal() as session:
-        products = (await session.exec(
-            select(Product).where(Product.image_status.in_(["no_image", "rejected"]))
-        )).all()
-        ids = [p.id for p in products]
-        for p in products:
-            p.image_status = "pending"
-        session.add_all(products)
-        await session.commit()
-
-    background_tasks.add_task(_run_batch_matching, ids)
-    return {"status": "started", "product_count": len(ids)}
 
 
 async def _run_matching(product_id: int):
