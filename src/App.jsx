@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 
 const api = axios.create({ baseURL: '/api' })
+const proxyImg = (url) => url ? `/api/image-proxy?url=${encodeURIComponent(url)}` : ''
 
 const useStats = () => useQuery({ queryKey: ['stats'], queryFn: () => api.get('/stats').then(r => r.data), refetchInterval: 5000 })
 const useProducts = (filters) => useQuery({ queryKey: ['products', filters], queryFn: () => api.get('/products', { params: filters }).then(r => r.data), keepPreviousData: true })
@@ -147,7 +148,7 @@ const CandidatesPanel = ({ productId, onClose }) => {
               {i===0 && <div style={{ background:'#0c1a3a', padding:'4px 12px', fontSize:10, color:'#60a5fa', letterSpacing:'0.1em', fontWeight:700 }}>⭐ BEST MATCH</div>}
               <div style={{ display:'flex' }}>
                 <div style={{ width:140, flexShrink:0, background:'#0a0e1a', display:'flex', alignItems:'center', justifyContent:'center', minHeight:120 }}>
-                  <img src={c.thumbnail_url||c.image_url} alt={c.title} style={{ maxWidth:130, maxHeight:130, objectFit:'contain' }}
+                  <img src={proxyImg(c.thumbnail_url||c.image_url)} alt={c.title} style={{ maxWidth:130, maxHeight:130, objectFit:'contain' }}
                     onError={e=>{ e.target.style.display='none' }} />
                 </div>
                 <div style={{ flex:1, padding:14 }}>
@@ -188,7 +189,7 @@ const ProductRow = ({ product, onSelect, isSelected }) => {
       <td style={{ padding:'10px 16px', width:72 }}>
         {product.approved_image_url ? (
           <div style={{ width:52, height:52, background:'#0a0e1a', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', border:'1px solid #1e293b' }}>
-            <img src={product.approved_image_url} alt="" style={{ maxWidth:50, maxHeight:50, objectFit:'contain' }} onError={e=>{e.target.parentElement.innerHTML='<span style="font-size:22px;opacity:0.3">⚙</span>'}} />
+            <img src={proxyImg(product.approved_image_url)} alt="" style={{ maxWidth:50, maxHeight:50, objectFit:'contain' }} onError={e=>{e.target.parentElement.innerHTML='<span style="font-size:22px;opacity:0.3">⚙</span>'}} />
           </div>
         ) : (
           <div style={{ width:52, height:52, background:'#111827', borderRadius:6, display:'flex', alignItems:'center', justifyContent:'center', border:'1px dashed #1e293b', color:'#475569', fontSize:22 }}>⚙</div>

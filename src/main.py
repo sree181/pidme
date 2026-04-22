@@ -393,6 +393,25 @@ async def _run_scraper(max_products: int):
         logger.error(f"Scraper error: {e}")
 
 
+# ── Image proxy (avoids hotlink blocks from external image hosts) ─────
+
+@app.get("/api/image-proxy")
+async def image_proxy(url: str = Query(..., description="External image URL to proxy")):
+    import requests as req
+    try:
+        resp = req.get(url, timeout=10, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "image/*",
+        })
+        if resp.status_code != 200:
+            raise HTTPException(status_code=resp.status_code, detail="Image fetch failed")
+        content_type = resp.headers.get("content-type", "image/jpeg")
+        from fastapi.responses import Response
+        return Response(content=resp.content, media_type=content_type)
+    except req.RequestException:
+        raise HTTPException(status_code=502, detail="Could not fetch image")
+
+
 # ── Serve React frontend ──────────────────────────────────────────────
 
 DIST_DIR = Path(__file__).parent / "dist"
